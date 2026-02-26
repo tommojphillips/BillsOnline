@@ -11,7 +11,6 @@
     <AssemblyName>BillsOnline</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile>Unity Full v3.5</TargetFrameworkProfile>
     <LangVersion>13</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -51,20 +50,20 @@
   <ItemGroup>
     <Reference Include="386PC, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>F:\SteamLibrary\steamapps\common\My Winter Car\Mods\386PC.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\My Winter Car\Mods\386PC.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PlayMaker">
-      <HintPath>F:\SteamLibrary\steamapps\common\My Winter Car\mywintercar_Data\Managed\PlayMaker.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\My Winter Car\mywintercar_Data\Managed\PlayMaker.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="UnityEngine">
-      <HintPath>F:\SteamLibrary\steamapps\common\My Winter Car\mywintercar_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\My Winter Car\mywintercar_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="MSCLoader">
-      <HintPath>F:\SteamLibrary\steamapps\common\My Winter Car\mywintercar_Data\Managed\MSCLoader.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\My Winter Car\mywintercar_Data\Managed\MSCLoader.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
@@ -86,51 +85,15 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Mods\Config\Mod Settings\BillsOnline\translate.json" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <MSCMODSFOLDER>NONE</MSCMODSFOLDER>
-    <MWCMODSFOLDER>F:\SteamLibrary\steamapps\common\My Winter Car\Mods</MWCMODSFOLDER>
+    <MWCMODSFOLDER>C:\Program Files (x86)\Steam\steamapps\common\My Winter Car\Mods</MWCMODSFOLDER>
     <ABFOLDER>NONE</ABFOLDER>
     <PostBuildEvent>
-      echo .
-      echo "== Running post build actions for configuration $(ConfigurationName)! ==="
-
-      IF "$(ConfigurationName)" == "Release" (
-      IF NOT "$(MSCMODSFOLDER)" == "NONE" (
-      copy "$(TargetPath)" "$(MSCMODSFOLDER)" /y
-      echo  "Copied dll into MSC mods folder!"        
-      )
-      IF NOT "$(MWCMODSFOLDER)" == "NONE" (
-      copy "$(TargetPath)" "$(MWCMODSFOLDER)" /y
-      echo  "Copied dll into MWC mods folder!"        
-      )
-      )
-      IF "$(ConfigurationName)" == "Debug" (
-      IF NOT "$(MSCMODSFOLDER)" == "NONE" (        
-      copy "$(TargetPath)" "$(MSCMODSFOLDER)" /y
-      copy "$(TargetDir)$(TargetName).pdb" "$(MSCMODSFOLDER)" /y
-      echo  "Copied pdb file into mods folder!"
-      cd "$(MSCMODSFOLDER)"
-      IF exist "$(MSCMODSFOLDER)\debug.bat" (
-      call "$(MSCMODSFOLDER)\debug.bat"
-      ) ELSE (
-      echo "debug.bat not found in "$(MSCMODSFOLDER)". You probably dont have MSCLoader debugging enabled!"
-      )
-      )
-      IF NOT "$(MWCMODSFOLDER)" == "NONE" (        
-      copy "$(TargetPath)" "$(MWCMODSFOLDER)" /y
-      copy "$(TargetDir)$(TargetName).pdb" "$(MWCMODSFOLDER)" /y
-      echo  "Copied pdb file into mods folder!"
-      cd "$(MWCMODSFOLDER)"
-      IF exist "$(MWCMODSFOLDER)\debug.bat" (
-      call "$(MWCMODSFOLDER)\debug.bat"
-      ) ELSE (
-      echo "debug.bat not found in "$(MWCMODSFOLDER)". You probably dont have MSCLoader debugging enabled!"
-      )
-      )      
-      )
-
-      echo "=== Done! ==="
     </PostBuildEvent>
   </PropertyGroup>
 </Project>
