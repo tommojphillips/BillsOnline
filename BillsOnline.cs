@@ -16,15 +16,15 @@ public class GovOnlineFines : Mod {
 
     public override void ModSetup() {
 
-        if (!ModLoader.IsModPresent("I386API")) {
+		SetupFunction(Setup.OnLoad, Mod_OnLoad);
+	}
+	private void Mod_OnLoad() {
+		if (!ModLoader.IsModPresent("I386API")) {
             ModConsole.Error("[BillsOnline] I386 API required!");
             ModUI.ShowMessage("I386 API not installed.\nI386 API required!", Name);
             return;
         }
 
-        SetupFunction(Setup.OnLoad, Mod_OnLoad);
-    }
-    private void Mod_OnLoad() {
         instance = this;
         bills = new Bills();
         bills.load();
