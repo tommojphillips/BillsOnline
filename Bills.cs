@@ -19,8 +19,8 @@ internal class Bills {
 
     private BillsState state;
     private int index;
-
-    Coroutine routine;
+    
+    private Coroutine routine;
 
     private bool reconnect;
 
@@ -95,7 +95,7 @@ internal class Bills {
         electricityBill2.load(Localize("Apartment Electricity Bill"), t4);
         electricityBill2.SetLocalizationFunction(Localize);
 
-        bills = new List<IBill>();
+        bills = new List<IBill>(4);
         bills.Add(phoneBill1);
         bills.Add(electricityBill1);
         bills.Add(phoneBill2);
@@ -360,6 +360,8 @@ internal class Bills {
     private bool command_enter() {
         index = 0;
         state = BillsState.Connect;
+        routine = null;
+        reconnect = false;
         return false; // do update
     }
     private bool command_update() {
