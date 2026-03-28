@@ -6,7 +6,7 @@ public class GovOnlineFines : Mod {
     public override string ID => "BillsOnline";
     public override string Name => "Bills Online";
     public override string Author => "tommojphillips";
-    public override string Version => "1.1.1";
+    public override string Version => "1.2";
     public override string Description => "Pay bills online!";
     public override Game SupportedGames => Game.MyWinterCar;
 
