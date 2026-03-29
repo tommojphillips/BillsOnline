@@ -309,7 +309,7 @@ internal class Bills {
     }
     private void viewNotConnected() {
         viewHeader();
-        I386.POS_WriteNewLine("                                   Não Conectado");
+        I386.POS_WriteNewLine("                                  Não Conectado");
         I386.POS_WriteNewLine("                           Pressione Espaço para Conectar");
         if (I386.GetKeyDown(KeyCode.Space)) {
             state = BillsState.Connect;
