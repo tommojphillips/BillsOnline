@@ -211,7 +211,7 @@ internal class Bills {
 
                 switch (timeType2) {
                     case TimeType2._24H:
-                        I386.POS_WriteNewLine($"{weekString}{dayString} at {dueHour}:{dueMinute:D2}");
+                        I386.POS_WriteNewLine($"{weekString}{dayString} as {dueHour}:{dueMinute:D2}");
                         break;
                     case TimeType2._12H:
                         string ampm = dueHour < 12 ? "AM" : "PM";
@@ -219,7 +219,7 @@ internal class Bills {
                         if (hour12 == 0) {
                             hour12 = 12;
                         }
-                        I386.POS_WriteNewLine($"{weekString}{dayString} at {hour12}:{dueMinute:D2} {ampm}");
+                        I386.POS_WriteNewLine($"{weekString}{dayString} as {hour12}:{dueMinute:D2} {ampm}");
                         break;
                 }
                 break;

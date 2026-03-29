@@ -145,6 +145,6 @@ internal class ElectricityBill : IBill {
     }
 
     public void view() {
-        I386.POS_WriteNewLine($"++ Consumo\t\t\t\t\t\t{KWH.ToString("F2")} kWh\t\t{pricePerKWH.Value.ToString("F2")} MK\t\t\t{(getPrice()).ToString("F2")} MK\n");
+        I386.POS_WriteNewLine($"++ Consumo\t\t\t\t\t\t\t{KWH.ToString("F2")} kWh\t\t{pricePerKWH.Value.ToString("F2")} MK\t\t\t{(getPrice()).ToString("F2")} MK\n");
     }
 }
