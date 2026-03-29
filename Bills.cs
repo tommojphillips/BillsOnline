@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Text.RegularExpressions;
 using UnityEngine;
 using HutongGames.PlayMaker;
 using I386API;
-using MSCLoader;
 
 namespace BillsOnline;
 
@@ -14,12 +10,8 @@ internal class Bills {
 
     private List<IBill> bills;
 
-    private Dictionary<string, string> translations;
-    private Dictionary<string, string> normalizedTranslations;
-
     private BillsState state;
     private int index;
-    
     private Coroutine routine;
 
     private bool reconnect;
@@ -44,7 +36,7 @@ internal class Bills {
     private FsmFloat minutes;
     private FsmFloat timeScale;
 
-    private readonly string[] DAYS = new string[] { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
+    private readonly string[] DAYS = new string[] { "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo" };
     
     private const float SECONDS_PER_MINUTE = 60f;
     private const float MINUTES_PER_HOUR = 60f;
@@ -54,15 +46,6 @@ internal class Bills {
     private const float SECONDS_PER_DAY = SECONDS_PER_HOUR * HOURS_PER_DAY;       // 86400
 
     public void load() {
-        // Initialize translations dictionary; will be loaded from config file
-        translations = new Dictionary<string, string>();
-        try {
-            LoadTranslationsFromFile();
-        }
-        catch (Exception) {
-            // silent - critical errors use ModConsole.Error where appropriate
-        }
-
         // Load diskette texture
         Texture2D texture = new Texture2D(128, 128);
         texture.LoadImage(Properties.Resources.FLOPPY_FINES);
@@ -77,23 +60,19 @@ internal class Bills {
 
         Transform t1 = GameObject.Find("Systems/PhoneBills1").transform;
         PhoneBill phoneBill1 = new PhoneBill();
-        phoneBill1.load(Localize("House Phone Bill"), t1);
-        phoneBill1.SetLocalizationFunction(Localize);
+        phoneBill1.load("Conta de Telefone da Casa", t1);
 
         Transform t2 = GameObject.Find("Systems/PhoneBills2").transform;
         PhoneBill phoneBill2 = new PhoneBill();
-        phoneBill2.load(Localize("Apartment Phone Bill"), t2);
-        phoneBill2.SetLocalizationFunction(Localize);
+        phoneBill2.load("Conta de Telefone do Apartamento", t2);
 
         Transform t3 = GameObject.Find("Systems/ElectricityBills1").transform;
         ElectricityBill electricityBill1 = new ElectricityBill();
-        electricityBill1.load(Localize("House Electricity Bill"), t3);
-        electricityBill1.SetLocalizationFunction(Localize);
+        electricityBill1.load("Conta de Eletricidade da Casa", t3);
 
         Transform t4 = GameObject.Find("Systems/ElectricityBills2").transform;
         ElectricityBill electricityBill2 = new ElectricityBill();
-        electricityBill2.load(Localize("Apartment Electricity Bill"), t4);
-        electricityBill2.SetLocalizationFunction(Localize);
+        electricityBill2.load("Conta de Eletricidade do Apartamento", t4);
 
         bills = new List<IBill>(4);
         bills.Add(phoneBill1);
@@ -189,7 +168,7 @@ internal class Bills {
     }
     private void viewHeader() {
         I386.POS_ClearScreen();
-        I386.POS_WriteNewLine("                                   " + Localize("Bills Online"));
+        I386.POS_WriteNewLine("                                  Contas Online");
         I386.POS_WriteNewLine("--------------------------------------------------------------------------------");
     }
     private void printDueDate(float due) {
@@ -213,19 +192,19 @@ internal class Bills {
                 string weekString;
                 string dayString;
                 if (daysLater > 7) {
-                    weekString = $"{Localize("In")} {weekOffset} {Localize("week(s) on")} ";
+                    weekString = $"Em {weekOffset} semana(s) em ";
                     dayString = dueDayName;
                 }
                 else if (daysLater == 7) {
-                    weekString = $"{Localize("Next week on")} ";
+                    weekString = $"Próxima semana em ";
                     dayString = dueDayName;
                 }
                 else {
                     weekString = "";
                     if (daysLater == 0)
-                        dayString = Localize("Today");
+                        dayString = "Hoje";
                     else if (daysLater == 1)
-                        dayString = Localize("Tomorrow");
+                        dayString = "Amanhã";
                     else
                         dayString = dueDayName;
                 }
@@ -235,7 +214,7 @@ internal class Bills {
                         I386.POS_WriteNewLine($"{weekString}{dayString} at {dueHour}:{dueMinute:D2}");
                         break;
                     case TimeType2._12H:
-                        string ampm = dueHour < 12 ? Localize("AM") : Localize("PM");
+                        string ampm = dueHour < 12 ? "AM" : "PM";
                         int hour12 = dueHour % 12;
                         if (hour12 == 0) {
                             hour12 = 12;
@@ -248,14 +227,14 @@ internal class Bills {
             case TimeType.RealTime:
                 dueHour = (int)(due / SECONDS_PER_HOUR);
                 dueMinute = (int)((due % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE);
-                I386.POS_WriteNewLine($"{dueHour}h {dueMinute:D2}m ({Localize("real time")})");
+                I386.POS_WriteNewLine($"{dueHour}h {dueMinute:D2}m (tempo real)");
                 break;
 
             case TimeType.GameTime:
                 due *= REAL_TO_GAME;
                 dueHour = (int)(due / SECONDS_PER_HOUR);
                 dueMinute = (int)((due % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE);
-                I386.POS_WriteNewLine($"{dueHour}h {dueMinute:D2}m ({Localize("game time")})");
+                I386.POS_WriteNewLine($"{dueHour}h {dueMinute:D2}m (tempo do jogo)");
                 break;
         }
     }
@@ -289,7 +268,7 @@ internal class Bills {
                 timeType2++;
             }
         }
-
+        
         if (I386.ModemConnected) {
             if (reconnect) {
                 state = BillsState.Connect;
@@ -303,7 +282,7 @@ internal class Bills {
         viewHeader();
 
         I386.POS_WriteNewLine($"   {bill.name}\n");
-        I386.POS_WriteNewLine($"   {Localize("Definition")}\t\t\t\t\t\t{Localize("Quantity")}\t\t{Localize("Price MK")}\t\t{Localize("Total MK")}\n");
+        I386.POS_WriteNewLine($"   Descrição\t\t\t\t\t\tQuantidade\t\tPreço MK\t\tTotal MK\n");
 
         if (bill.isActive) {
             bill.view();
@@ -313,47 +292,47 @@ internal class Bills {
                 return;
             }
 
-            I386.POS_WriteNewLine("\n                                                                    [" + Localize("PAY NOW") + "] ");
+            I386.POS_WriteNewLine("\n                                                                    [PAGAR AGORA] ");
             if (bill.isCutOff) {
-                I386.POS_WriteNewLine("   " + Localize("Overdue"));
+                I386.POS_WriteNewLine("   Vencido");
             }
             else {
-                I386.POS_Write("   " + Localize("Due") + ": ");
+                I386.POS_Write("   Vencimento: ");
                 printDueDate(bill.timeUntilCutOff);
             }
         }
         else {
-            I386.POS_WriteNewLine("   " + Localize("Invoice not ready"));
-            I386.POS_Write("   " + Localize("Due") + ": ");
+            I386.POS_WriteNewLine("   Fatura não pronta");
+            I386.POS_Write("   Vencimento: ");
             printDueDate(bill.timeUntilNextBill);
         }
     }
     private void viewNotConnected() {
         viewHeader();
-        I386.POS_WriteNewLine("                                   " + Localize("Not Connected"));
-        I386.POS_WriteNewLine("                               " + Localize("Press Space to Connect"));
+        I386.POS_WriteNewLine("                                   Não Conectado");
+        I386.POS_WriteNewLine("                           Pressione Espaço para Conectar");
         if (I386.GetKeyDown(KeyCode.Space)) {
             state = BillsState.Connect;
         }
     }
     private void viewConnect() {
         viewHeader();
-        I386.POS_WriteNewLine("                                   " + Localize("Connecting..."));
+        I386.POS_WriteNewLine("                                   Conectando...");
         connect();
     }
     private void viewPaymentProcessing() {
         viewHeader();
-        I386.POS_WriteNewLine("                               " + Localize("Processing Payment..."));
+        I386.POS_WriteNewLine("                             Processando Pagamento...");
         processPayment();
     }
     private void viewPaymentSuccess() {
         viewHeader();
-        I386.POS_WriteNewLine($"                                 " + Localize("Payment Success"));
+        I386.POS_WriteNewLine($"                             Pagamento Bem-sucedido");
         paymentSuccess();
     }
     private void viewPaymentFailed() {
         viewHeader();
-        I386.POS_WriteNewLine($"                                 " + Localize("Payment Failed"));
+        I386.POS_WriteNewLine($"                                Pagamento Falhou");
         paymentFailed();
     }
 
@@ -391,92 +370,5 @@ internal class Bills {
         }
 
         return false; // continue
-    }
-
-    internal string Localize(string s) {
-        if (translations != null && translations.Count > 0) {
-            if (translations.TryGetValue(s, out string translatedValue)) {
-                return translatedValue;
-            }
-
-            // try normalized matching (case-insensitive, whitespace-tolerant)
-            string normalizedInput = NormalizeKey(s);
-            if (!string.IsNullOrEmpty(normalizedInput)) {
-                string tv;
-                if (normalizedTranslations.TryGetValue(normalizedInput, out tv)) {
-                    return tv;
-                }
-
-                // try substring matching (input contains key or vice-versa)
-                foreach (var kv in normalizedTranslations) {
-                    if (normalizedInput.Contains(kv.Key) || kv.Key.Contains(normalizedInput)) {
-                        // do not log successful translations to avoid noise
-                        return kv.Value;
-                    }
-                }
-            }
-        }
-
-        // no translation found (silent)
-        return s;
-    }
-
-    // Normalizes keys: reduces multiple spaces, removes simple punctuation and converts to lower
-    private string NormalizeKey(string s) {
-        if (string.IsNullOrEmpty(s))
-            return string.Empty;
-
-        // collapse multiple spaces
-        string collapsed = Regex.Replace(s, "\\s+", " ").Trim();
-
-        // remove punctuation (keeps letters, numbers, / and space)
-        string cleaned = Regex.Replace(collapsed, "[^a-zA-Z0-9\\/ ]+", "");
-
-        return cleaned.ToLowerInvariant();
-    }
-
-    // Loads translations from a simple JSON file located at Mods\Config\Mod Settings\BillsOnline:
-    // { "English text": "Translated text", ... }
-    private void LoadTranslationsFromFile() {
-        string asmLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;
-        string dir = Path.GetDirectoryName(asmLocation);
-        // look for file at Mods\Config\Mod Settings\BillsOnline\translate.json
-        string configDir = Path.Combine(Path.Combine(Path.Combine(dir, "Config"), "Mod Settings"), "BillsOnline");
-        string file = Path.Combine(configDir, "translate.json");
-
-        // Attempt to locate translations file; do not spam console on normal load
-        if (!File.Exists(file)) {
-            return;
-        }
-
-        string json = File.ReadAllText(file);
-        // Simple regex for "key": "value" pairs
-        Regex rx = new Regex("\"(.*?)\"\\s*:\\s*\"(.*?)\"", RegexOptions.Singleline);
-        MatchCollection matches = rx.Matches(json);
-        foreach (Match m in matches) {
-            try {
-                string key = Regex.Unescape(m.Groups[1].Value);
-                string val = Regex.Unescape(m.Groups[2].Value);
-                if (translations == null) translations = new Dictionary<string, string>();
-                translations[key] = val;
-            }
-            catch {
-                // ignore invalid entry
-            }
-        }
-
-        // parsed silently
-
-        // build normalized map for tolerant searches
-        normalizedTranslations = new Dictionary<string, string>();
-        if (translations != null) {
-            foreach (var kv in translations) {
-                string nk = NormalizeKey(kv.Key);
-                if (!string.IsNullOrEmpty(nk)) {
-                    normalizedTranslations[nk] = kv.Value;
-                }
-            }
-            // loaded silently
-        }
     }
 }

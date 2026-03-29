@@ -15,11 +15,9 @@ internal interface IBill {
     public float getPrice();
     public void pay();
     public void view();
-    public void SetLocalizationFunction(System.Func<string, string> localize);
 }
 internal class PhoneBill : IBill {
     public PlayMakerFSM fsm;
-    private System.Func<string, string> localizeFunc;
 
     public FsmGameObject envelope;
 
@@ -70,10 +68,6 @@ internal class PhoneBill : IBill {
         envelope = fsm.GetVariable<FsmGameObject>("Bill");
     }
 
-    public void SetLocalizationFunction(System.Func<string, string> localize) {
-        localizeFunc = localize;
-    }
-
     public float getPrice() {
 
         float priceLocalMinutes = localMinutes.Value * pricePerLocalMinute.Value;
@@ -90,23 +84,20 @@ internal class PhoneBill : IBill {
     }
 
     public void view() {
-        string localize(string s) => localizeFunc?.Invoke(s) ?? s;
+        I386.POS_WriteNewLine("++ Taxa assinatura básica:\t\t\t1\t\t\t\t128 MK\t\t\t128 MK");
 
-        I386.POS_WriteNewLine("++ " + localize("Basic subscription fee") + ":\t\t\t1\t\t\t\t128 MK\t\t\t128 MK");
+        I386.POS_WriteNewLine($"++ Chamadas locais (min):\t\t\t{Mathf.RoundToInt(localMinutes.Value)}\t\t\t\t{pricePerLocalMinute.Value.ToString("F2")} MK\t\t\t{(localMinutes.Value * pricePerLocalMinute.Value).ToString("F2")} MK");
+        I386.POS_WriteNewLine($"++ Chamadas locais (número):\t\t{Mathf.RoundToInt(callsLocal.Value)}\t\t\t\t{pricePerLocalCall.Value.ToString("F2")} MK\t\t\t{(callsLocal.Value * pricePerLocalCall.Value).ToString("F2")} MK");
 
-        I386.POS_WriteNewLine($"++ {localize("Local calls (min):")}\t\t\t{Mathf.RoundToInt(localMinutes.Value)}\t\t\t\t{pricePerLocalMinute.Value.ToString("F2")} MK\t\t\t{(localMinutes.Value * pricePerLocalMinute.Value).ToString("F2")} MK");
-        I386.POS_WriteNewLine($"++ {localize("Local calls (number):")}\t\t\t{Mathf.RoundToInt(callsLocal.Value)}\t\t\t\t{pricePerLocalCall.Value.ToString("F2")} MK\t\t\t{(callsLocal.Value * pricePerLocalCall.Value).ToString("F2")} MK");
-
-        I386.POS_WriteNewLine($"++ {localize("Long distance calls (min):")}\t\t{Mathf.RoundToInt(longMinutes.Value)}\t\t\t\t{pricePerLongMinute.Value.ToString("F2")} MK\t\t\t{(longMinutes.Value * pricePerLongMinute.Value).ToString("F2")} MK");
-        I386.POS_WriteNewLine($"++ {localize("Long distance calls (number):")}\t{Mathf.RoundToInt(callsLong.Value)}\t\t\t\t{pricePerLongCall.Value.ToString("F2")} MK\t\t\t{(callsLong.Value * pricePerLongCall.Value).ToString("F2")} MK");
+        I386.POS_WriteNewLine($"++ Chamadas interurbana (min):\t\t{Mathf.RoundToInt(longMinutes.Value)}\t\t\t\t{pricePerLongMinute.Value.ToString("F2")} MK\t\t\t{(longMinutes.Value * pricePerLongMinute.Value).ToString("F2")} MK");
+        I386.POS_WriteNewLine($"++ Chamadas interurbana (número):\t{Mathf.RoundToInt(callsLong.Value)}\t\t\t\t{pricePerLongCall.Value.ToString("F2")} MK\t\t\t{(callsLong.Value * pricePerLongCall.Value).ToString("F2")} MK");
         I386.POS_WriteNewLine($"\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t{(getPrice()).ToString("F2")} MK");
     }
 }
 
 internal class ElectricityBill : IBill {
     public PlayMakerFSM fsm;
-    private System.Func<string, string> localizeFunc;
-
+    
     public FsmGameObject envelope;
 
     public FsmFloat pricePerKWH;
@@ -145,10 +136,6 @@ internal class ElectricityBill : IBill {
         envelope = fsm.GetVariable<FsmGameObject>("Bill");
     }
 
-    public void SetLocalizationFunction(System.Func<string, string> localize) {
-        localizeFunc = localize;
-    }
-
     public float getPrice() {
         return unpaidBill.Value;
     }
@@ -158,7 +145,6 @@ internal class ElectricityBill : IBill {
     }
 
     public void view() {
-        string localize(string s) => localizeFunc?.Invoke(s) ?? s;
-        I386.POS_WriteNewLine($"++ {localize("Consumption")}\t\t\t\t\t\t{KWH.ToString("F2")} kWh\t\t{pricePerKWH.Value.ToString("F2")} MK\t\t\t{(getPrice()).ToString("F2")} MK\n");
+        I386.POS_WriteNewLine($"++ Consumo\t\t\t\t\t\t{KWH.ToString("F2")} kWh\t\t{pricePerKWH.Value.ToString("F2")} MK\t\t\t{(getPrice()).ToString("F2")} MK\n");
     }
 }
